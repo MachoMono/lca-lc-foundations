@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Run when you sit down: get the latest work from GitHub.
+set -e
+cd "$(dirname "$0")"
+git pull --rebase --autostash

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Run when you finish: save everything and send it to GitHub.
+# Optional message: ./done "finished module 1"
+set -e
+cd "$(dirname "$0")"
+git add -A
+if git diff --cached --quiet; then
+    echo "Nothing new to save."
+else
+    git commit -q -m "${*:-Work from $(hostname) on $(date '+%Y-%m-%d %H:%M')}"
+fi
+git pull --rebase --autostash
+git push
+echo "Synced."
