@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Run once after cloning (safe to re-run): builds .venv, installs packages,
+# creates .env if missing, then verifies the environment.
+set -e
+cd "$(dirname "$0")"
+
+if command -v uv >/dev/null 2>&1; then
+    uv sync
+else
+    if [ ! -d .venv ]; then
+        # The course needs Python >=3.12,<3.14
+        for py in python3.13 python3.12 python3 python; do
+            if command -v "$py" >/dev/null 2>&1 &&
+                "$py" -c 'import sys; sys.exit(not (3, 12) <= sys.version_info[:2] < (3, 14))'; then
+                PY="$py"
+                break
+            fi
+        done
+        if [ -z "$PY" ]; then
+            echo "Need Python 3.12 or 3.13 (or install uv: https://docs.astral.sh/uv/)." >&2
+            exit 1
+        fi
+        "$PY" -m venv .venv
+    fi
+    if [ -x .venv/bin/python ]; then VENV_PY=.venv/bin/python; else VENV_PY=.venv/Scripts/python.exe; fi
+    "$VENV_PY" -m pip install -q -r requirements.txt
+fi
+
+if [ ! -f .env ]; then
+    cp example.env .env
+    echo "Created .env from example.env - fill in your API keys before running notebooks."
+fi
+
+if [ -x .venv/bin/python ]; then VENV_PY=.venv/bin/python; else VENV_PY=.venv/Scripts/python.exe; fi
+"$VENV_PY" env_utils.py

@@ -3,3 +3,7 @@
 set -e
 cd "$(dirname "$0")"
 git pull --rebase --autostash
+# First time on this computer: build the environment.
+if [ ! -d .venv ] || [ ! -f .env ]; then
+    ./setup
+fi
